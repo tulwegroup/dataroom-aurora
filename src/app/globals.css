@@ -1,0 +1,244 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* Aurora OSI v2.0 - Production Build */
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-copper: var(--copper);
+  --color-copper-light: var(--copper-light);
+  --color-copper-dark: var(--copper-dark);
+  --color-gold: var(--gold);
+  --color-aurora-glow: var(--aurora-glow);
+}
+
+:root {
+  --radius: 0.625rem;
+  /* Aurora Dark Theme - Forced */
+  --background: #050508;
+  --foreground: #ffffff;
+  --card: #0a0a10;
+  --card-foreground: #ffffff;
+  --popover: #0a0a10;
+  --popover-foreground: #ffffff;
+  --primary: #c9844a;
+  --primary-foreground: #050508;
+  --secondary: #12121a;
+  --secondary-foreground: #ffffff;
+  --muted: #15151f;
+  --muted-foreground: #a0a0b0;
+  --accent: #1a1a26;
+  --accent-foreground: #ffffff;
+  --destructive: #993333;
+  --border: rgba(201, 132, 74, 0.25);
+  --input: rgba(255, 255, 255, 0.1);
+  --ring: #c9844a;
+  --chart-1: #c9844a;
+  --chart-2: #8b9dc3;
+  --chart-3: #b87333;
+  --chart-4: #d4a574;
+  --chart-5: #6b7280;
+  --sidebar: #0a0a10;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #c9844a;
+  --sidebar-primary-foreground: #050508;
+  --sidebar-accent: #12121a;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(201, 132, 74, 0.25);
+  --sidebar-ring: #c9844a;
+  
+  /* Aurora Custom Colors */
+  --copper: #c9844a;
+  --copper-light: #d4a574;
+  --copper-dark: #8b5a2b;
+  --gold: #d4af37;
+  --aurora-glow: rgba(201, 132, 74, 0.4);
+}
+
+/* Force dark mode */
+html {
+  color-scheme: dark;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-white font-medium;
+  }
+}
+
+/* Custom scrollbar for Aurora theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a10;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(201, 132, 74, 0.4);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(201, 132, 74, 0.6);
+}
+
+/* Aurora text gradient */
+.aurora-gradient {
+  background: linear-gradient(135deg, #c9844a 0%, #d4af37 50%, #b87333 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Aurora glow effect */
+.aurora-glow {
+  box-shadow: 0 0 40px rgba(201, 132, 74, 0.2), 0 0 80px rgba(201, 132, 74, 0.1);
+}
+
+/* Subtle border glow */
+.aurora-border {
+  border: 1px solid rgba(201, 132, 74, 0.25);
+  box-shadow: inset 0 0 30px rgba(201, 132, 74, 0.03);
+}
+
+/* Grid pattern overlay */
+.grid-pattern {
+  background-image: 
+    linear-gradient(rgba(201, 132, 74, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201, 132, 74, 0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* Smooth page transitions */
+.page-transition {
+  transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+}
+
+/* Section fade in animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+/* Subtle pulse animation for CTAs */
+@keyframes subtle-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(201, 132, 74, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 25px 5px rgba(201, 132, 74, 0.2);
+  }
+}
+
+.animate-subtle-pulse {
+  animation: subtle-pulse 3s ease-in-out infinite;
+}
+
+/* Earth rotation animation placeholder */
+@keyframes slowRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-slow-rotate {
+  animation: slowRotate 120s linear infinite;
+}
+
+/* Line drawing animation */
+@keyframes drawLine {
+  from {
+    stroke-dashoffset: 1000;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-draw-line {
+  stroke-dasharray: 1000;
+  animation: drawLine 2s ease-out forwards;
+}
+
+/* Card hover effect */
+.card-hover {
+  transition: all 0.4s ease;
+}
+
+.card-hover:hover {
+  border-color: rgba(201, 132, 74, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 0 40px rgba(201, 132, 74, 0.05);
+}
+
+/* Text selection */
+::selection {
+  background: rgba(201, 132, 74, 0.3);
+  color: #ffffff;
+}
+
+/* Focus styles */
+*:focus-visible {
+  outline: 2px solid rgba(201, 132, 74, 0.5);
+  outline-offset: 2px;
+}

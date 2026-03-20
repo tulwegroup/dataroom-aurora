@@ -1,0 +1,17 @@
+{
+  "name": "Aurora OSI - Orbital Subsurface Intelligence",
+  "short_name": "Aurora OSI",
+  "description": "Planetary-Scale Orbital Subsurface Intelligence Infrastructure",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050508",
+  "theme_color": "#c9844a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

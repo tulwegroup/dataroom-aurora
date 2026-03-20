@@ -1,0 +1,12 @@
+# Aurora OSI - Production Deployment
+# https://aurora-osi.com
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://aurora-osi.com/sitemap.xml
+
+# Disallow common attack vectors
+Disallow: /api/
+Disallow: /_next/
