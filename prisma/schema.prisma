@@ -1,0 +1,242 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl  = env("DIRECT_DATABASE_URL")
+}
+
+// ============================================================================
+// DATA ROOM MODELS
+// ============================================================================
+
+// User roles for the data room
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  REVIEWER
+  VIEWER
+}
+
+// Document access tiers
+enum AccessTier {
+  TEASER      // Public marketing materials
+  QUALIFIED   // NDA required, qualified investors only
+  TRANSACTION // Full due diligence, deal-specific
+}
+
+// Document status
+enum DocumentStatus {
+  DRAFT
+  PENDING_REVIEW
+  APPROVED
+  ARCHIVED
+  REVOKED
+}
+
+// Deal room status
+enum DealRoomStatus {
+  ACTIVE
+  CLOSED
+  ARCHIVED
+}
+
+// Data Room Users
+model DataRoomUser {
+  id            String      @id @default(cuid())
+  email         String      @unique
+  name          String?
+  company       String?
+  title         String?
+  phone         String?
+  role          UserRole    @default(VIEWER)
+  isActive      Boolean     @default(true)
+  mfaEnabled    Boolean     @default(false)
+  lastLoginAt   DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  // Relations
+  accessGrants  AccessGrant[]
+  auditLogs     AuditLog[]
+  ndaSignatures NDASignature[]
+  
+  @@map("data_room_users")
+}
+
+// Deal Rooms - separate spaces for different transactions
+model DealRoom {
+  id          String          @id @default(cuid())
+  name        String
+  description String?
+  status      DealRoomStatus  @default(ACTIVE)
+  validFrom   DateTime?
+  validUntil  DateTime?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  
+  // Relations
+  documents    Document[]
+  accessGrants AccessGrant[]
+  ndaTemplates NDATemplate[]
+  
+  @@map("deal_rooms")
+}
+
+// Documents in the data room
+model Document {
+  id             String         @id @default(cuid())
+  dealRoomId     String
+  dealRoom       DealRoom       @relation(fields: [dealRoomId], references: [id], onDelete: Cascade)
+  
+  // Document metadata
+  title          String
+  description    String?
+  fileName       String
+  fileSize       Int            @default(0)
+  mimeType       String         @default("application/octet-stream")
+  s3Key          String         @default("")
+  
+  // Access control
+  accessTier     AccessTier     @default(QUALIFIED)
+  status         DocumentStatus @default(APPROVED)
+  
+  // Classification
+  category       String?
+  tags           String?
+  
+  // Watermarking
+  watermarkText  String?
+  hasWatermark   Boolean        @default(false)
+  
+  // Version tracking
+  version        Int            @default(1)
+  
+  // Timestamps
+  uploadedBy     String?
+  reviewedBy     String?
+  reviewedAt     DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  
+  // Relations
+  auditLogs      AuditLog[]
+  
+  @@map("documents")
+}
+
+// NDA Templates for different deal rooms
+model NDATemplate {
+  id          String    @id @default(cuid())
+  dealRoomId  String
+  dealRoom    DealRoom  @relation(fields: [dealRoomId], references: [id], onDelete: Cascade)
+  name        String
+  content     String    @default("")
+  version     Int       @default(1)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relations
+  signatures  NDASignature[]
+  
+  @@map("nda_templates")
+}
+
+// NDA Signatures tracking
+model NDASignature {
+  id            String      @id @default(cuid())
+  ndaTemplateId String
+  ndaTemplate   NDATemplate @relation(fields: [ndaTemplateId], references: [id], onDelete: Cascade)
+  userId        String
+  user          DataRoomUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  signedAt      DateTime    @default(now())
+  ipAddress     String?
+  userAgent     String?
+  
+  @@unique([ndaTemplateId, userId])
+  @@map("nda_signatures")
+}
+
+// Access grants - who can access what
+model AccessGrant {
+  id          String      @id @default(cuid())
+  userId      String
+  user        DataRoomUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dealRoomId  String
+  dealRoom    DealRoom    @relation(fields: [dealRoomId], references: [id], onDelete: Cascade)
+  
+  // Access level for this deal room
+  accessTier  AccessTier  @default(QUALIFIED)
+  
+  // Time-limited access
+  grantedAt   DateTime    @default(now())
+  expiresAt   DateTime?
+  grantedBy   String?
+  
+  isActive    Boolean     @default(true)
+  
+  @@unique([userId, dealRoomId])
+  @@map("access_grants")
+}
+
+// Comprehensive audit logging
+model AuditLog {
+  id          String        @id @default(cuid())
+  userId      String?
+  user        DataRoomUser? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  // Action details
+  action      String
+  resource    String
+  resourceId  String?
+  documentId  String?
+  document    Document?     @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  
+  // Request metadata
+  ipAddress   String?
+  userAgent   String?
+  details     String?
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([userId])
+  @@index([action])
+  @@index([resource])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// Access requests from potential investors
+model AccessRequest {
+  id            String      @id @default(cuid())
+  email         String
+  name          String
+  company       String
+  title         String?
+  phone         String?
+  dealRoomId    String?
+  
+  // Request status
+  status        String      @default("PENDING")
+  requestedTier AccessTier  @default(TEASER)
+  
+  // Message from requester
+  message       String?
+  
+  // Admin notes
+  adminNotes    String?
+  reviewedBy    String?
+  reviewedAt    DateTime?
+  
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  @@map("access_requests")
+}
