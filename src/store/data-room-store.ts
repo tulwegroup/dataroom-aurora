@@ -12,7 +12,7 @@ export interface DataRoomUser {
   company: string | null
   title: string | null
   role: UserRole
-  accessTier?: AccessTier // User's default access tier
+  accessTier?: AccessTier
   isActive: boolean
   mfaEnabled: boolean
   lastLoginAt: string | null

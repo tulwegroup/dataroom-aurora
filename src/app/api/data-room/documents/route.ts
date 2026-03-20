@@ -22,7 +22,6 @@ export async function GET(request: NextRequest) {
     }
 
     // Filter by access tier based on user's tier
-    // Admins can see all documents
     if (userRole !== 'SUPER_ADMIN' && userRole !== 'ADMIN') {
       const allowedTiers = TIER_HIERARCHY[userTier] || ['TEASER']
       where.accessTier = { in: allowedTiers }
@@ -109,7 +108,6 @@ export async function POST(request: NextRequest) {
         category,
         tags: tags ? JSON.stringify(tags) : null,
         uploadedBy,
-        // Admin uploads are automatically approved
         status: 'APPROVED',
       },
     })

@@ -6,8 +6,9 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider  = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
 }
 
 // ============================================================================
@@ -64,23 +65,8 @@ model DataRoomUser {
   accessGrants  AccessGrant[]
   auditLogs     AuditLog[]
   ndaSignatures NDASignature[]
-  sessions      UserSession[]
   
   @@map("data_room_users")
-}
-
-// User sessions for security tracking
-model UserSession {
-  id           String   @id @default(cuid())
-  userId       String
-  user         DataRoomUser @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tokenHash    String   @unique
-  ipAddress    String?
-  userAgent    String?
-  expiresAt    DateTime
-  createdAt    DateTime @default(now())
-  
-  @@map("user_sessions")
 }
 
 // Deal Rooms - separate spaces for different transactions
@@ -95,7 +81,7 @@ model DealRoom {
   updatedAt   DateTime        @updatedAt
   
   // Relations
-  documents   Document[]
+  documents    Document[]
   accessGrants AccessGrant[]
   ndaTemplates NDATemplate[]
   
@@ -112,36 +98,33 @@ model Document {
   title          String
   description    String?
   fileName       String
-  fileSize       Int
-  mimeType       String
-  s3Key          String         // S3 object key
-  s3VersionId    String?        // For versioning
+  fileSize       Int            @default(0)
+  mimeType       String         @default("application/octet-stream")
+  s3Key          String         @default("")
   
   // Access control
   accessTier     AccessTier     @default(QUALIFIED)
-  status         DocumentStatus @default(DRAFT)
+  status         DocumentStatus @default(APPROVED)
+  
+  // Classification
+  category       String?
+  tags           String?
   
   // Watermarking
   watermarkText  String?
   hasWatermark   Boolean        @default(false)
   
-  // Classification
-  category       String?        // e.g., "Financial", "Legal", "Technical"
-  tags           String?        // JSON array of tags
-  
   // Version tracking
   version        Int            @default(1)
-  parentDocId    String?
   
   // Timestamps
-  uploadedBy     String?        // User ID
-  reviewedBy     String?        // User ID who approved
+  uploadedBy     String?
+  reviewedBy     String?
   reviewedAt     DateTime?
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
   
   // Relations
-  accessGrants   DocumentAccess[]
   auditLogs      AuditLog[]
   
   @@map("documents")
@@ -153,7 +136,7 @@ model NDATemplate {
   dealRoomId  String
   dealRoom    DealRoom  @relation(fields: [dealRoomId], references: [id], onDelete: Cascade)
   name        String
-  content     String    // NDA text/HTML content
+  content     String    @default("")
   version     Int       @default(1)
   isActive    Boolean   @default(true)
   createdAt   DateTime  @default(now())
@@ -195,7 +178,7 @@ model AccessGrant {
   // Time-limited access
   grantedAt   DateTime    @default(now())
   expiresAt   DateTime?
-  grantedBy   String?     // User ID of admin who granted
+  grantedBy   String?
   
   isActive    Boolean     @default(true)
   
@@ -203,43 +186,23 @@ model AccessGrant {
   @@map("access_grants")
 }
 
-// Document-level access overrides
-model DocumentAccess {
-  id          String    @id @default(cuid())
-  documentId  String
-  document    Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  
-  // Either userId or accessTier must be set
-  userId      String?   // Specific user access
-  accessTier  AccessTier? // Tier-based access
-  
-  canView     Boolean   @default(true)
-  canDownload Boolean   @default(false)
-  canPrint    Boolean   @default(false)
-  
-  expiresAt   DateTime?
-  createdAt   DateTime  @default(now())
-  
-  @@map("document_access")
-}
-
 // Comprehensive audit logging
 model AuditLog {
-  id          String   @id @default(cuid())
+  id          String        @id @default(cuid())
   userId      String?
   user        DataRoomUser? @relation(fields: [userId], references: [id], onDelete: SetNull)
   
   // Action details
-  action      String   // VIEW, DOWNLOAD, UPLOAD, DELETE, GRANT_ACCESS, etc.
-  resource    String   // Resource type: DOCUMENT, DEAL_ROOM, USER, etc.
-  resourceId  String?  // ID of the affected resource
+  action      String
+  resource    String
+  resourceId  String?
   documentId  String?
-  document    Document? @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  document    Document?     @relation(fields: [documentId], references: [id], onDelete: SetNull)
   
   // Request metadata
   ipAddress   String?
   userAgent   String?
-  details     String?  // JSON string with additional details
+  details     String?
   
   createdAt   DateTime @default(now())
   
@@ -261,7 +224,7 @@ model AccessRequest {
   dealRoomId    String?
   
   // Request status
-  status        String      @default("PENDING") // PENDING, APPROVED, REJECTED
+  status        String      @default("PENDING")
   requestedTier AccessTier  @default(TEASER)
   
   // Message from requester
@@ -276,26 +239,4 @@ model AccessRequest {
   updatedAt     DateTime    @updatedAt
   
   @@map("access_requests")
-}
-
-// ============================================================================
-// LEGACY MODELS (keeping for reference)
-// ============================================================================
-
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Post {
-  id        String   @id @default(cuid())
-  title     String
-  content   String?
-  published Boolean  @default(false)
-  authorId  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }

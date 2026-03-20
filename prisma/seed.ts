@@ -62,7 +62,7 @@ async function main() {
       description: 'Confidential investment materials for Project Aurora',
       status: 'ACTIVE',
       validFrom: new Date(),
-      validUntil: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), // 90 days
+      validUntil: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
     },
   })
 
@@ -236,7 +236,7 @@ async function main() {
     },
   })
 
-  // Grant TEASER user access to deal room 1 (TEASER level only)
+  // Grant TEASER user access to deal room 1
   await db.accessGrant.upsert({
     where: {
       userId_dealRoomId: {
@@ -252,7 +252,7 @@ async function main() {
     },
   })
 
-  // Grant QUALIFIED user access to deal room 1 (QUALIFIED level)
+  // Grant QUALIFIED user access to deal room 1
   await db.accessGrant.upsert({
     where: {
       userId_dealRoomId: {
@@ -269,22 +269,18 @@ async function main() {
   })
 
   console.log('Granted access permissions')
-  console.log('\nSeeding complete!')
   console.log('\n========================================')
   console.log('DEMO CREDENTIALS')
   console.log('========================================')
-  console.log('\n🔐 Admin (Full Access):')
-  console.log('   Email: admin@aurora-osi.com')
-  console.log('   Password: (any password)')
-  console.log('   Access: All documents (TRANSACTION tier)')
-  console.log('\n📊 TEASER User (Limited Access):')
-  console.log('   Email: investor@example.com')
-  console.log('   Password: (any password)')
-  console.log('   Access: Only TEASER documents')
-  console.log('\n📋 QUALIFIED User (Medium Access):')
-  console.log('   Email: qualified@example.com')
-  console.log('   Password: (any password)')
-  console.log('   Access: TEASER + QUALIFIED documents')
+  console.log('\nAdmin (Full Access):')
+  console.log('  Email: admin@aurora-osi.com')
+  console.log('  Password: (any password)')
+  console.log('\nTEASER User (Limited):')
+  console.log('  Email: investor@example.com')
+  console.log('  Password: (any password)')
+  console.log('\nQUALIFIED User (Medium):')
+  console.log('  Email: qualified@example.com')
+  console.log('  Password: (any password)')
   console.log('\n========================================')
 }
 
