@@ -50,6 +50,7 @@ enum DealRoomStatus {
 model DataRoomUser {
   id            String      @id @default(cuid())
   email         String      @unique
+  password      String?
   name          String?
   company       String?
   title         String?
